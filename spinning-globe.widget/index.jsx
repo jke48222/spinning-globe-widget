@@ -356,7 +356,8 @@ const resolve = (key, props, parse, mock) => {
 export const command = false;
 export const refreshFrequency = false;
 
-const W = 360, H = 200, R = 74, CX = 102, CY = 124, TILT = 20;
+// Square canvas with the globe centered. CX/CY are the canvas center.
+const W = 200, H = 200, R = 80, CX = 100, CY = 100, TILT = 20;
 
 export const className = card("dark", W, H, ...LAYOUT.atlas) + `
   background: transparent; box-shadow: none; backdrop-filter: none; padding: 0; cursor: pointer;
