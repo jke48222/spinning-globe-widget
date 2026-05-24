@@ -413,25 +413,17 @@ const waterColor = (lat, z) =>
 // Animation state.
 //
 // The render loop is driven by setInterval rather than requestAnimationFrame:
-// Übersicht's desktop WebView is always backgrounded, where rAF (and CSS
-// animations) are throttled and may stop ticking entirely. A generation token
-// and the timer handle are stored on `window` (shared across the module reloads
-// Übersicht performs) so each new instance cancels the previous timer instead
-// of stacking loops that fight over the canvas. The rotation angle is also kept
-// on `window` so it resumes from the same position after a reload.
-// Übersicht evaluates the module body in a context where `window` may be
-// undefined, so guard this top-level access (the timer itself only runs at
-// render, where `window` exists).
-const GEN = (typeof window !== "undefined")
-  ? (window.__wsGlobeGen = (window.__wsGlobeGen || 0) + 1)
-  : 0;
+// The render loop is driven by setInterval (rAF and CSS animations can be
+// throttled in Übersicht's desktop WebView). A single timer handle and the
+// rotation angle are stored on `window` so re-renders and module reloads reuse
+// one timer instead of stacking. ensureSpin() always clears the previous timer
+// before starting a new one, so the loop never self-cancels and keeps spinning.
 const REDUCED = typeof window !== "undefined" && window.matchMedia &&
   window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
 const dot = (ctx, x, y, r) => { ctx.beginPath(); ctx.arc(x, y, r, 0, 6.2832); ctx.fill(); };
 
 const drawGlobe = () => {
-  if (window.__wsGlobeGen !== GEN) { clearInterval(window.__wsGlobeTimer); return; }
   const cv = document.getElementById("ws-globe");
   if (!cv) return;
   const dpr = window.devicePixelRatio || 1;
@@ -497,9 +489,10 @@ const drawGlobe = () => {
   if (!REDUCED) window.__wsGlobeRot = (rot + 0.4) % 360;
 };
 
-// Claim ownership and (re)start the single shared timer at ~30fps.
+// (Re)start the single shared timer at ~30fps, replacing any previous one.
 const ensureSpin = () => {
-  window.__wsGlobeGen = GEN;
+  if (typeof window === "undefined") return;
+  if (window.__wsGlobeRot == null) window.__wsGlobeRot = 0;
   if (window.__wsGlobeTimer) clearInterval(window.__wsGlobeTimer);
   window.__wsGlobeTimer = setInterval(drawGlobe, 33);
 };
