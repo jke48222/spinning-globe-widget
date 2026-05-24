@@ -418,7 +418,12 @@ const waterColor = (lat, z) =>
 // Übersicht performs) so each new instance cancels the previous timer instead
 // of stacking loops that fight over the canvas. The rotation angle is also kept
 // on `window` so it resumes from the same position after a reload.
-const GEN = (window.__wsGlobeGen = (window.__wsGlobeGen || 0) + 1);
+// Übersicht evaluates the module body in a context where `window` may be
+// undefined, so guard this top-level access (the timer itself only runs at
+// render, where `window` exists).
+const GEN = (typeof window !== "undefined")
+  ? (window.__wsGlobeGen = (window.__wsGlobeGen || 0) + 1)
+  : 0;
 const REDUCED = typeof window !== "undefined" && window.matchMedia &&
   window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
