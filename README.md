@@ -1,6 +1,6 @@
 # spinning-globe
 
-> A slowly spinning dot-matrix globe with arcs and a pin on every city you've visited.
+> An antique parchment desk globe with a red pin on every city you've visited.
 
 [![Release](https://img.shields.io/github/v/release/jke48222/spinning-globe-widget?label=release)](https://github.com/jke48222/spinning-globe-widget/releases/latest) [![License: MIT](https://img.shields.io/github/license/jke48222/spinning-globe-widget)](LICENSE) ![Platform: macOS](https://img.shields.io/badge/platform-macOS-lightgrey)
 
@@ -12,7 +12,7 @@ runs on any Mac with no extra files beyond the bundled assets.
 
 ![screenshot](media/screenshot.png)
 
-A desk globe: a solid ocean sphere with the dot-matrix continents turning on it, a brass meridian ring, a brass stem, and a walnut base with a brass plate. Typeface: Cinzel. All fonts are under the SIL Open Font License; see `spinning-globe.widget/fonts/OFL.txt`.
+An antique desk globe: aged parchment gores with the continents stippled in brown ink and the visited cities as red pins joined by red routes, a brass full meridian ring, a turned ebony base with a brass collar, and an engraved nameplate. Click a pin to open it in Maps. Typeface: Playfair Display. All fonts are under the SIL Open Font License; see `spinning-globe.widget/fonts/OFL.txt`.
 
 ## Before and after
 

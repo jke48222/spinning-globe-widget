@@ -357,29 +357,34 @@ export const refreshFrequency = false;
 
 // Square canvas with the globe centered. CX/CY are the canvas center.
 const W = 200, H = 200, R = 82, CX = 100, CY = 100, TILT = 20;
-
 const FONTS = "spinning-globe.widget/fonts";
-// A desk globe: a solid ocean sphere with the dot-matrix continents turning
-// on it, a brass meridian ring, a brass stem, and a walnut base with a brass
-// plate. Click a pin to open that city in Maps.
-export const className = card("dark", 224, 276, ...LAYOUT.atlas) + `
-  @font-face { font-family: "Cinzel"; src: url("${FONTS}/Cinzel-700.woff2") format("woff2"); font-weight: 700; }
-  background: transparent; box-shadow: none; backdrop-filter: none; padding: 0; cursor: pointer; overflow: visible; user-select:none; -webkit-user-select:none;
-  .ws-drag { top: 2px; left: 2px; color: rgba(255,255,255,0.6); background: rgba(255,255,255,0.08); } .ws-resize { bottom: 2px; right: 2px; color: rgba(255,255,255,0.6); background: rgba(255,255,255,0.08); }
-  .sphere { position:absolute; left: 30px; top: 18px; width: 164px; height: 164px; border-radius: 50%;
-            background: radial-gradient(circle at 34% 28%, #3E6EA8 0%, #1F416F 45%, #0B1E3A 100%);
-            box-shadow: inset -16px -14px 30px rgba(0,0,0,0.55), inset 10px 10px 24px rgba(255,255,255,0.10), 0 16px 30px rgba(0,0,0,0.55); }
-  canvas { position:absolute; left: 12px; top: 0; width: 200px; height: 200px; display:block; }
-  .ring { position:absolute; left: 22px; top: 10px; width: 180px; height: 180px; border-radius: 50%; pointer-events:none; transform: rotate(23deg);
-          border: 6px solid; border-color: #EACB6E #B8912E #A57E27 #D6B24A; box-shadow: 0 6px 12px rgba(0,0,0,0.45), inset 0 0 0 1px rgba(0,0,0,0.35); }
-  .ring::before { content:""; position:absolute; left: 50%; top: -14px; width: 10px; height: 10px; margin-left: -5px; border-radius: 50%; background: radial-gradient(circle at 40% 35%, #F3DE8E, #7B5A14 70%); }
-  .stem { position:absolute; left: 50%; bottom: 30px; width: 12px; height: 40px; margin-left: -6px; border-radius: 3px; background: linear-gradient(90deg, #A57E27, #EACB6E 45%, #A57E27); box-shadow: 0 4px 8px rgba(0,0,0,0.5); }
-  .base { position:absolute; left: 34px; right: 34px; bottom: 6px; height: 30px; border-radius: 50% / 46%; background: radial-gradient(ellipse at 50% 30%, #7C4E2E 0%, #4B2D19 70%, #2E1A0E 100%);
-          box-shadow: 0 10px 20px rgba(0,0,0,0.6), inset 0 2px 0 rgba(255,255,255,0.14), inset 0 -3px 0 rgba(0,0,0,0.4); }
-  .base::before { content:""; position:absolute; inset: 3px 3px; border-radius: inherit; border: 2px solid rgba(201,158,58,0.7); }
-  .plate { position:absolute; left: 50%; bottom: 14px; transform: translateX(-50%); padding: 0 8px; height: 13px; border-radius: 2px; white-space:nowrap;
-           background: linear-gradient(180deg, #EACB6E 0%, #C99E3A 45%, #A57E27 100%); box-shadow: 0 1px 3px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.5);
-           font: 700 5.5px/13px "Cinzel", serif; letter-spacing: 1.6px; text-transform:uppercase; color: #3A2A0A; }
+// An antique desk globe: aged parchment gores with the continents stippled in
+// brown ink and the visited cities as red pins, a brass full meridian ring,
+// a turned ebony base with a brass collar, and an engraved nameplate. Click a
+// pin to open it in Maps.
+export const className = card("dark", 240, 288, ...LAYOUT.atlas) + `
+  @font-face { font-family: "Playfair Display"; src: url("${FONTS}/PlayfairDisplay-500Italic.woff2") format("woff2"); font-weight: 500; font-style: italic; }
+  --brass: #C9A55A; --brass2: #7E5F22; --ebony: #241A14;
+  background: transparent; box-shadow: none; backdrop-filter: none; padding: 0; overflow: visible; cursor: pointer; user-select:none; -webkit-user-select:none;
+  .ws-drag { top: 4px; left: 4px; color: rgba(255,255,255,0.7); background: rgba(0,0,0,0.3); } .ws-resize { bottom: 4px; right: 4px; color: rgba(255,255,255,0.7); background: rgba(0,0,0,0.3); }
+  .back { position:absolute; left: 90px; top: 22px; width: 60px; height: 192px; border-radius: 50%; pointer-events:none; box-shadow: inset 0 0 0 5px #8E7238, inset 0 0 0 6px #4E3A14; -webkit-mask: linear-gradient(90deg, rgba(0,0,0,0) 50%, #000 50%); }
+  .sphere { position:absolute; left: 38px; top: 36px; width: 164px; height: 164px; border-radius: 50%;
+            background: radial-gradient(circle at 36% 30%, #F1E3C2 0%, #DCC59A 45%, #B89B6B 80%, #8F7448 100%);
+            box-shadow: 0 24px 34px rgba(0,0,0,0.55), inset -14px -18px 30px rgba(70,45,15,0.45), inset 0 0 0 1px rgba(80,55,20,0.4); }
+  .sphere::after { content:""; position:absolute; inset:0; border-radius: 50%; opacity: 0.5; mix-blend-mode: multiply; background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.12'/%3E%3C/svg%3E"); }
+  canvas { position:absolute; left: 20px; top: 18px; width: 200px; height: 200px; }
+  .glare { position:absolute; left: 38px; top: 36px; width: 164px; height: 164px; border-radius: 50%; pointer-events:none; background: radial-gradient(circle at 34% 26%, rgba(255,255,255,0.35), rgba(255,255,255,0) 40%); }
+  .meridian { position:absolute; left: 90px; top: 22px; width: 60px; height: 192px; border-radius: 50%; pointer-events:none;
+              box-shadow: inset 0 0 0 5px var(--brass), inset 0 0 0 6px var(--brass2), 0 0 0 1px rgba(0,0,0,0.25); -webkit-mask: linear-gradient(90deg, #000 50%, rgba(0,0,0,0) 50%); }
+  .meridian::before { content:""; position:absolute; left: 12px; top: 8px; width: 8px; height: 176px; border-radius: 50%; background: repeating-linear-gradient(180deg, rgba(0,0,0,0) 0 10px, rgba(60,40,10,0.35) 10px 11px); opacity: 0.6; }
+  .pin { position:absolute; left: 115px; width: 10px; height: 10px; border-radius: 50%; pointer-events:none; background: radial-gradient(circle at 40% 35%, #F0D89A, #9A7A40 70%); box-shadow: 0 1px 2px rgba(0,0,0,0.5), inset 0 0 0 1px #6E5222; }
+  .pin.n { top: 18px; } .pin.s { top: 208px; }
+  .stem { position:absolute; left: 116px; top: 212px; width: 8px; height: 30px; background: linear-gradient(90deg, #7E5F22, #E2C27C 45%, #7E5F22); box-shadow: 0 2px 3px rgba(0,0,0,0.4); }
+  .collar { position:absolute; left: 60px; top: 236px; width: 120px; height: 12px; border-radius: 50%; background: linear-gradient(180deg, #E2C27C, #8C6E38); box-shadow: 0 2px 3px rgba(0,0,0,0.4); }
+  .base { position:absolute; left: 45px; top: 242px; width: 150px; height: 40px; border-radius: 50% 50% 50% 50% / 40% 40% 60% 60%;
+          background: radial-gradient(ellipse at 50% 30%, #4A3A2E, var(--ebony) 60%, #120C08 100%); box-shadow: 0 20px 30px rgba(0,0,0,0.55), inset 0 1px 0 rgba(255,255,255,0.15), inset 0 -2px 0 rgba(0,0,0,0.6); }
+  .plate { position:absolute; left: 72px; top: 256px; width: 96px; height: 16px; border-radius: 2px; background: linear-gradient(180deg, #E2C27C, #B8945A); box-shadow: inset 0 0 0 1px #7E5F22, 0 1px 2px rgba(0,0,0,0.5);
+           font: 500 italic 8px/16px "Playfair Display", serif; color: #3A2A0A; text-align:center; letter-spacing: 0.3px; }
 `;
 // Land/water bitmask: 120x60 cells at 3-degree resolution, baked from
 // Natural Earth ne_110m_land. One bit per cell, row-major, base64-packed.
@@ -421,11 +426,11 @@ const proj3 = (lat, lng, rot, tiltDeg) => {
 };
 
 const landColor = (lat, z) =>
-  Math.abs(lat) > 72 ? `rgba(228,236,240,${0.3 + 0.6 * z})`
-                     : `rgba(108,222,148,${0.3 + 0.62 * z})`;
+  Math.abs(lat) > 72 ? `rgba(150,130,100,${0.2 + 0.5 * z})`
+                     : `rgba(78,52,24,${0.35 + 0.6 * z})`;
 const waterColor = (lat, z) =>
-  Math.abs(lat) > 75 ? `rgba(205,222,236,${0.2 + 0.5 * z})`
-                     : `rgba(64,132,210,${0.16 + 0.5 * z})`;
+  Math.abs(lat) > 75 ? `rgba(200,190,170,${0.1 + 0.3 * z})`
+                     : `rgba(150,120,80,${0.08 + 0.3 * z})`;
 
 // Animation state.
 //
@@ -454,8 +459,8 @@ const drawGlobe = () => {
 
   // Ocean sphere base.
   const g = ctx.createRadialGradient(CX - 24, CY - 24, 8, CX, CY, R);
-  g.addColorStop(0, "rgba(28,58,96,0.5)");
-  g.addColorStop(1, "rgba(8,20,40,0.22)");
+  g.addColorStop(0, "rgba(255,246,222,0.30)");
+  g.addColorStop(1, "rgba(80,50,20,0.28)");
   ctx.fillStyle = g;
   dot(ctx, CX, CY, R);
 
@@ -477,7 +482,7 @@ const drawGlobe = () => {
   }
   // Arcs connecting consecutive cities, drawn only when both ends face forward.
   ctx.lineWidth = 1;
-  ctx.strokeStyle = "rgba(255,140,160,0.35)";
+  ctx.strokeStyle = "rgba(150,40,40,0.4)";
   for (let i = 0; i + 1 < CITIES.length; i++) {
     const a = proj3(CITIES[i].lat, CITIES[i].lng, rot, TILT);
     const b = proj3(CITIES[i + 1].lat, CITIES[i + 1].lng, rot, TILT);
@@ -499,8 +504,8 @@ const drawGlobe = () => {
     const p = proj3(CITIES[i].lat, CITIES[i].lng, rot, TILT);
     if (p.z <= 0) continue;
     const x = CX + p.x * R, y = CY - p.y * R;
-    ctx.fillStyle = "rgba(255,90,110,0.4)"; dot(ctx, x, y, 5);
-    ctx.fillStyle = "#FF6B81"; dot(ctx, x, y, 2.1);
+    ctx.fillStyle = "rgba(180,40,40,0.3)"; dot(ctx, x, y, 5);
+    ctx.fillStyle = "#B3262E"; dot(ctx, x, y, 2.1);
   }
 
   if (!REDUCED) window.__wsGlobeRot = (rot + 0.4) % 360;
@@ -545,10 +550,14 @@ export const render = () => {
   ensureSpin();
   return (
     <div aria-label={`Desk globe, ${CITIES.length} cities visited`} onClick={onPickGlobe}>
+      <div className="back" />
       <div className="sphere" />
       <canvas id="ws-globe" />
-      <div className="ring" />
+      <div className="glare" />
+      <div className="meridian" />
+      <span className="pin n" /><span className="pin s" />
       <div className="stem" />
+      <div className="collar" />
       <div className="base" />
       <div className="plate">{CITIES.length} cities · visited</div>
       <DragHandle k="atlas" />
