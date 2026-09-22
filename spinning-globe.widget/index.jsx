@@ -1,4 +1,4 @@
-import { React } from "uebersicht";
+import { React, run } from "uebersicht";
 // --- Inlined design system (self-contained; formerly theme.js) ---
 // Shared design system for the widget set: color tokens, fonts, layout, the
 // common card shell, drag/resize handles, a last-known-good cache, and the
@@ -131,7 +131,7 @@ const card = (variant, w, h, x = 0, y = 0) => `
   .ws-drag  { position:absolute; top:6px; left:6px; z-index:30;
               width:18px; height:18px; border-radius:6px;
               display:flex; align-items:center; justify-content:center;
-              font-size:11px; line-height:1; cursor:grab; opacity:0.42;
+              font-size:11px; line-height:1; cursor:grab; opacity:0.22;
               transition:opacity .15s ease; user-select:none;
               -webkit-user-select:none;
               color:${variant === "dark" ? T.onDarkMute : T.inkMute};
@@ -143,7 +143,7 @@ const card = (variant, w, h, x = 0, y = 0) => `
   .ws-resize { position:absolute; bottom:5px; right:5px; z-index:30;
                width:16px; height:16px; border-radius:5px;
                display:flex; align-items:center; justify-content:center;
-               font-size:11px; line-height:1; cursor:nwse-resize; opacity:0.42;
+               font-size:11px; line-height:1; cursor:nwse-resize; opacity:0.22;
                transition:opacity .15s ease; user-select:none;
                -webkit-user-select:none;
                color:${variant === "dark" ? T.onDarkMute : T.inkMute};
@@ -344,6 +344,7 @@ const resolve = (key, props, parse, mock) => {
   return { data: mock, mock: true };
 };
 // --- End inlined design system ---
+
 // A slowly spinning dot-matrix globe with a glowing pin on each visited city.
 //
 // Continents are sampled from Natural Earth land data, baked into the bit grid
@@ -356,36 +357,13 @@ export const command = false;
 export const refreshFrequency = false;
 
 // Square canvas with the globe centered. CX/CY are the canvas center.
-const W = 200, H = 200, R = 82, CX = 100, CY = 100, TILT = 20;
-const FONTS = "spinning-globe.widget/fonts";
-// An antique desk globe: aged parchment gores with the continents stippled in
-// brown ink and the visited cities as red pins, a brass full meridian ring,
-// a turned ebony base with a brass collar, and an engraved nameplate. Click a
-// pin to open it in Maps.
-export const className = card("dark", 240, 288, ...LAYOUT.atlas) + `
-  @font-face { font-family: "Playfair Display"; src: url("${FONTS}/PlayfairDisplay-500Italic.woff2") format("woff2"); font-weight: 500; font-style: italic; }
-  --brass: #C9A55A; --brass2: #7E5F22; --ebony: #241A14;
-  background: transparent; box-shadow: none; backdrop-filter: none; padding: 0; overflow: visible; cursor: pointer; user-select:none; -webkit-user-select:none;
-  .ws-drag { top: 4px; left: 4px; color: rgba(255,255,255,0.7); background: rgba(0,0,0,0.3); } .ws-resize { bottom: 4px; right: 4px; color: rgba(255,255,255,0.7); background: rgba(0,0,0,0.3); }
-  .back { position:absolute; left: 90px; top: 22px; width: 60px; height: 192px; border-radius: 50%; pointer-events:none; box-shadow: inset 0 0 0 5px #8E7238, inset 0 0 0 6px #4E3A14; -webkit-mask: linear-gradient(90deg, rgba(0,0,0,0) 50%, #000 50%); }
-  .sphere { position:absolute; left: 38px; top: 36px; width: 164px; height: 164px; border-radius: 50%;
-            background: radial-gradient(circle at 36% 30%, #F1E3C2 0%, #DCC59A 45%, #B89B6B 80%, #8F7448 100%);
-            box-shadow: 0 24px 34px rgba(0,0,0,0.55), inset -14px -18px 30px rgba(70,45,15,0.45), inset 0 0 0 1px rgba(80,55,20,0.4); }
-  .sphere::after { content:""; position:absolute; inset:0; border-radius: 50%; opacity: 0.5; mix-blend-mode: multiply; background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.12'/%3E%3C/svg%3E"); }
-  canvas { position:absolute; left: 20px; top: 18px; width: 200px; height: 200px; }
-  .glare { position:absolute; left: 38px; top: 36px; width: 164px; height: 164px; border-radius: 50%; pointer-events:none; background: radial-gradient(circle at 34% 26%, rgba(255,255,255,0.35), rgba(255,255,255,0) 40%); }
-  .meridian { position:absolute; left: 90px; top: 22px; width: 60px; height: 192px; border-radius: 50%; pointer-events:none;
-              box-shadow: inset 0 0 0 5px var(--brass), inset 0 0 0 6px var(--brass2), 0 0 0 1px rgba(0,0,0,0.25); -webkit-mask: linear-gradient(90deg, #000 50%, rgba(0,0,0,0) 50%); }
-  .meridian::before { content:""; position:absolute; left: 12px; top: 8px; width: 8px; height: 176px; border-radius: 50%; background: repeating-linear-gradient(180deg, rgba(0,0,0,0) 0 10px, rgba(60,40,10,0.35) 10px 11px); opacity: 0.6; }
-  .pin { position:absolute; left: 115px; width: 10px; height: 10px; border-radius: 50%; pointer-events:none; background: radial-gradient(circle at 40% 35%, #F0D89A, #9A7A40 70%); box-shadow: 0 1px 2px rgba(0,0,0,0.5), inset 0 0 0 1px #6E5222; }
-  .pin.n { top: 18px; } .pin.s { top: 208px; }
-  .stem { position:absolute; left: 116px; top: 212px; width: 8px; height: 30px; background: linear-gradient(90deg, #7E5F22, #E2C27C 45%, #7E5F22); box-shadow: 0 2px 3px rgba(0,0,0,0.4); }
-  .collar { position:absolute; left: 60px; top: 236px; width: 120px; height: 12px; border-radius: 50%; background: linear-gradient(180deg, #E2C27C, #8C6E38); box-shadow: 0 2px 3px rgba(0,0,0,0.4); }
-  .base { position:absolute; left: 45px; top: 242px; width: 150px; height: 40px; border-radius: 50% 50% 50% 50% / 40% 40% 60% 60%;
-          background: radial-gradient(ellipse at 50% 30%, #4A3A2E, var(--ebony) 60%, #120C08 100%); box-shadow: 0 20px 30px rgba(0,0,0,0.55), inset 0 1px 0 rgba(255,255,255,0.15), inset 0 -2px 0 rgba(0,0,0,0.6); }
-  .plate { position:absolute; left: 72px; top: 256px; width: 96px; height: 16px; border-radius: 2px; background: linear-gradient(180deg, #E2C27C, #B8945A); box-shadow: inset 0 0 0 1px #7E5F22, 0 1px 2px rgba(0,0,0,0.5);
-           font: 500 italic 8px/16px "Playfair Display", serif; color: #3A2A0A; text-align:center; letter-spacing: 0.3px; }
+const W = 200, H = 200, R = 80, CX = 100, CY = 100, TILT = 20;
+
+export const className = card("dark", W, H, ...LAYOUT.atlas) + `
+  background: transparent; box-shadow: none; backdrop-filter: none; padding: 0; cursor: pointer;
+  canvas { width: 100%; height: 100%; display: block; }
 `;
+
 // Land/water bitmask: 120x60 cells at 3-degree resolution, baked from
 // Natural Earth ne_110m_land. One bit per cell, row-major, base64-packed.
 const GRID_COLS = 120, GRID_ROWS = 60, GRID_S = 3;
@@ -426,11 +404,11 @@ const proj3 = (lat, lng, rot, tiltDeg) => {
 };
 
 const landColor = (lat, z) =>
-  Math.abs(lat) > 72 ? `rgba(150,130,100,${0.2 + 0.5 * z})`
-                     : `rgba(78,52,24,${0.35 + 0.6 * z})`;
+  Math.abs(lat) > 72 ? `rgba(228,236,240,${0.3 + 0.6 * z})`
+                     : `rgba(108,222,148,${0.3 + 0.62 * z})`;
 const waterColor = (lat, z) =>
-  Math.abs(lat) > 75 ? `rgba(200,190,170,${0.1 + 0.3 * z})`
-                     : `rgba(150,120,80,${0.08 + 0.3 * z})`;
+  Math.abs(lat) > 75 ? `rgba(205,222,236,${0.2 + 0.5 * z})`
+                     : `rgba(64,132,210,${0.16 + 0.5 * z})`;
 
 // Animation state.
 //
@@ -459,8 +437,8 @@ const drawGlobe = () => {
 
   // Ocean sphere base.
   const g = ctx.createRadialGradient(CX - 24, CY - 24, 8, CX, CY, R);
-  g.addColorStop(0, "rgba(255,246,222,0.30)");
-  g.addColorStop(1, "rgba(80,50,20,0.28)");
+  g.addColorStop(0, "rgba(28,58,96,0.5)");
+  g.addColorStop(1, "rgba(8,20,40,0.22)");
   ctx.fillStyle = g;
   dot(ctx, CX, CY, R);
 
@@ -482,7 +460,7 @@ const drawGlobe = () => {
   }
   // Arcs connecting consecutive cities, drawn only when both ends face forward.
   ctx.lineWidth = 1;
-  ctx.strokeStyle = "rgba(150,40,40,0.4)";
+  ctx.strokeStyle = "rgba(255,140,160,0.35)";
   for (let i = 0; i + 1 < CITIES.length; i++) {
     const a = proj3(CITIES[i].lat, CITIES[i].lng, rot, TILT);
     const b = proj3(CITIES[i + 1].lat, CITIES[i + 1].lng, rot, TILT);
@@ -504,8 +482,8 @@ const drawGlobe = () => {
     const p = proj3(CITIES[i].lat, CITIES[i].lng, rot, TILT);
     if (p.z <= 0) continue;
     const x = CX + p.x * R, y = CY - p.y * R;
-    ctx.fillStyle = "rgba(180,40,40,0.3)"; dot(ctx, x, y, 5);
-    ctx.fillStyle = "#B3262E"; dot(ctx, x, y, 2.1);
+    ctx.fillStyle = "rgba(255,90,110,0.4)"; dot(ctx, x, y, 5);
+    ctx.fillStyle = "#FF6B81"; dot(ctx, x, y, 2.1);
   }
 
   if (!REDUCED) window.__wsGlobeRot = (rot + 0.4) % 360;
@@ -539,29 +517,13 @@ const onPick = (e) => {
   else run(`open -a "Maps"`);
 };
 
-const onPickGlobe = (e) => {
-  const cv = document.getElementById("ws-globe"); if (!cv) return run(`open -a "Maps"`);
-  const rect = cv.getBoundingClientRect(); const mx = (e.clientX - rect.left) * (W / rect.width); const my = (e.clientY - rect.top) * (H / rect.height);
-  const rot = window.__wsGlobeRot || 0; let best = null, bestD = 14 * 14;
-  for (const c of CITIES) { const p = proj3(c.lat, c.lng, rot, TILT); if (p.z <= 0) continue; const x = CX + p.x * R, y = CY - p.y * R; const d = (x - mx) * (x - mx) + (y - my) * (y - my); if (d < bestD) { bestD = d; best = c; } }
-  if (best) run(`open "https://maps.apple.com/?ll=${best.lat},${best.lng}"`); else run(`open -a "Maps"`);
-};
 export const render = () => {
   ensureSpin();
   return (
-    <div aria-label={`Desk globe, ${CITIES.length} cities visited`} onClick={onPickGlobe}>
-      <div className="back" />
-      <div className="sphere" />
-      <canvas id="ws-globe" />
-      <div className="glare" />
-      <div className="meridian" />
-      <span className="pin n" /><span className="pin s" />
-      <div className="stem" />
-      <div className="collar" />
-      <div className="base" />
-      <div className="plate">{CITIES.length} cities · visited</div>
+    <div aria-label={`Spinning globe, ${CITIES.length} cities visited`} onClick={onPick}>
       <DragHandle k="atlas" />
       <ResizeHandle k="atlas" />
+      <canvas id="ws-globe" />
     </div>
   );
 };
