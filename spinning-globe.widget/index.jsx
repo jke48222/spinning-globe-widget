@@ -1,4 +1,4 @@
-import { React, run } from "uebersicht";
+import { React } from "uebersicht";
 // --- Inlined design system (self-contained; formerly theme.js) ---
 // Shared design system for the widget set: color tokens, fonts, layout, the
 // common card shell, drag/resize handles, a last-known-good cache, and the
@@ -131,7 +131,7 @@ const card = (variant, w, h, x = 0, y = 0) => `
   .ws-drag  { position:absolute; top:6px; left:6px; z-index:30;
               width:18px; height:18px; border-radius:6px;
               display:flex; align-items:center; justify-content:center;
-              font-size:11px; line-height:1; cursor:grab; opacity:0.22;
+              font-size:11px; line-height:1; cursor:grab; opacity:0.42;
               transition:opacity .15s ease; user-select:none;
               -webkit-user-select:none;
               color:${variant === "dark" ? T.onDarkMute : T.inkMute};
@@ -143,7 +143,7 @@ const card = (variant, w, h, x = 0, y = 0) => `
   .ws-resize { position:absolute; bottom:5px; right:5px; z-index:30;
                width:16px; height:16px; border-radius:5px;
                display:flex; align-items:center; justify-content:center;
-               font-size:11px; line-height:1; cursor:nwse-resize; opacity:0.22;
+               font-size:11px; line-height:1; cursor:nwse-resize; opacity:0.42;
                transition:opacity .15s ease; user-select:none;
                -webkit-user-select:none;
                color:${variant === "dark" ? T.onDarkMute : T.inkMute};
@@ -344,7 +344,6 @@ const resolve = (key, props, parse, mock) => {
   return { data: mock, mock: true };
 };
 // --- End inlined design system ---
-
 // A slowly spinning dot-matrix globe with a glowing pin on each visited city.
 //
 // Continents are sampled from Natural Earth land data, baked into the bit grid
@@ -357,13 +356,31 @@ export const command = false;
 export const refreshFrequency = false;
 
 // Square canvas with the globe centered. CX/CY are the canvas center.
-const W = 200, H = 200, R = 80, CX = 100, CY = 100, TILT = 20;
+const W = 200, H = 200, R = 82, CX = 100, CY = 100, TILT = 20;
 
-export const className = card("dark", W, H, ...LAYOUT.atlas) + `
-  background: transparent; box-shadow: none; backdrop-filter: none; padding: 0; cursor: pointer;
-  canvas { width: 100%; height: 100%; display: block; }
+const FONTS = "spinning-globe.widget/fonts";
+// A desk globe: a solid ocean sphere with the dot-matrix continents turning
+// on it, a brass meridian ring, a brass stem, and a walnut base with a brass
+// plate. Click a pin to open that city in Maps.
+export const className = card("dark", 224, 276, ...LAYOUT.atlas) + `
+  @font-face { font-family: "Cinzel"; src: url("${FONTS}/Cinzel-700.woff2") format("woff2"); font-weight: 700; }
+  background: transparent; box-shadow: none; backdrop-filter: none; padding: 0; cursor: pointer; overflow: visible; user-select:none; -webkit-user-select:none;
+  .ws-drag { top: 2px; left: 2px; color: rgba(255,255,255,0.6); background: rgba(255,255,255,0.08); } .ws-resize { bottom: 2px; right: 2px; color: rgba(255,255,255,0.6); background: rgba(255,255,255,0.08); }
+  .sphere { position:absolute; left: 30px; top: 18px; width: 164px; height: 164px; border-radius: 50%;
+            background: radial-gradient(circle at 34% 28%, #3E6EA8 0%, #1F416F 45%, #0B1E3A 100%);
+            box-shadow: inset -16px -14px 30px rgba(0,0,0,0.55), inset 10px 10px 24px rgba(255,255,255,0.10), 0 16px 30px rgba(0,0,0,0.55); }
+  canvas { position:absolute; left: 12px; top: 0; width: 200px; height: 200px; display:block; }
+  .ring { position:absolute; left: 22px; top: 10px; width: 180px; height: 180px; border-radius: 50%; pointer-events:none; transform: rotate(23deg);
+          border: 6px solid; border-color: #EACB6E #B8912E #A57E27 #D6B24A; box-shadow: 0 6px 12px rgba(0,0,0,0.45), inset 0 0 0 1px rgba(0,0,0,0.35); }
+  .ring::before { content:""; position:absolute; left: 50%; top: -14px; width: 10px; height: 10px; margin-left: -5px; border-radius: 50%; background: radial-gradient(circle at 40% 35%, #F3DE8E, #7B5A14 70%); }
+  .stem { position:absolute; left: 50%; bottom: 30px; width: 12px; height: 40px; margin-left: -6px; border-radius: 3px; background: linear-gradient(90deg, #A57E27, #EACB6E 45%, #A57E27); box-shadow: 0 4px 8px rgba(0,0,0,0.5); }
+  .base { position:absolute; left: 34px; right: 34px; bottom: 6px; height: 30px; border-radius: 50% / 46%; background: radial-gradient(ellipse at 50% 30%, #7C4E2E 0%, #4B2D19 70%, #2E1A0E 100%);
+          box-shadow: 0 10px 20px rgba(0,0,0,0.6), inset 0 2px 0 rgba(255,255,255,0.14), inset 0 -3px 0 rgba(0,0,0,0.4); }
+  .base::before { content:""; position:absolute; inset: 3px 3px; border-radius: inherit; border: 2px solid rgba(201,158,58,0.7); }
+  .plate { position:absolute; left: 50%; bottom: 14px; transform: translateX(-50%); padding: 0 8px; height: 13px; border-radius: 2px; white-space:nowrap;
+           background: linear-gradient(180deg, #EACB6E 0%, #C99E3A 45%, #A57E27 100%); box-shadow: 0 1px 3px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.5);
+           font: 700 5.5px/13px "Cinzel", serif; letter-spacing: 1.6px; text-transform:uppercase; color: #3A2A0A; }
 `;
-
 // Land/water bitmask: 120x60 cells at 3-degree resolution, baked from
 // Natural Earth ne_110m_land. One bit per cell, row-major, base64-packed.
 const GRID_COLS = 120, GRID_ROWS = 60, GRID_S = 3;
@@ -517,13 +534,25 @@ const onPick = (e) => {
   else run(`open -a "Maps"`);
 };
 
+const onPickGlobe = (e) => {
+  const cv = document.getElementById("ws-globe"); if (!cv) return run(`open -a "Maps"`);
+  const rect = cv.getBoundingClientRect(); const mx = (e.clientX - rect.left) * (W / rect.width); const my = (e.clientY - rect.top) * (H / rect.height);
+  const rot = window.__wsGlobeRot || 0; let best = null, bestD = 14 * 14;
+  for (const c of CITIES) { const p = proj3(c.lat, c.lng, rot, TILT); if (p.z <= 0) continue; const x = CX + p.x * R, y = CY - p.y * R; const d = (x - mx) * (x - mx) + (y - my) * (y - my); if (d < bestD) { bestD = d; best = c; } }
+  if (best) run(`open "https://maps.apple.com/?ll=${best.lat},${best.lng}"`); else run(`open -a "Maps"`);
+};
 export const render = () => {
   ensureSpin();
   return (
-    <div aria-label={`Spinning globe, ${CITIES.length} cities visited`} onClick={onPick}>
+    <div aria-label={`Desk globe, ${CITIES.length} cities visited`} onClick={onPickGlobe}>
+      <div className="sphere" />
+      <canvas id="ws-globe" />
+      <div className="ring" />
+      <div className="stem" />
+      <div className="base" />
+      <div className="plate">{CITIES.length} cities · visited</div>
       <DragHandle k="atlas" />
       <ResizeHandle k="atlas" />
-      <canvas id="ws-globe" />
     </div>
   );
 };
